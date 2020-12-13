@@ -1,25 +1,34 @@
-const ProtoBufJs = require("protobufjs");
+const Register  = require('./im.basic/Register')['AcFunDanmu']['RegisterRequest']
+const AppInfo  = require('./im.basic/Register')['AcFunDanmu']['AppInfo']
+const DeviceInfo  = require('./im.basic/Register')['AcFunDanmu']['DeviceInfo']
+const ZtCommonInfo  = require('./im.basic/Register')['AcFunDanmu']['ZtCommonInfo']
 
 const protobuf = {
-
-    RegisterRequest(){
-
-        var appInfoProto = ProtoBufJs.loadSync("./protos/im.basic/Register.proto")
-        var appInfo = appInfoProto.lookupType("AcFunDanmu.AppInfo")
-        var appInfoObj = appInfo.create()
-        appInfoObj.appName = "link-sdk"
-        appInfoObj.sdkVersion = "1.2.1"
-
-        console.log(appInfoObj)
-        var buffer = appInfo.encode(appInfoObj).finish();
+    Register(userId){
+        var register = new Register({
+            appInfo: new AppInfo({
+                appName: "link-sdk",
+                sdkVersion: "1.2.1",
+            }),
+            deviceInfo: new DeviceInfo({
+                platformType: DeviceInfo.PlatformType['H5'],
+                deviceModel:  "h5",
+            }),
+            presenceStatus:  Register.PresenceStatus['kPresenceOnline'],
+            appActiveStatus: Register.ActiveStatus['kAppInForeground'],
+            // instanceId:      t.instanceID,
+            ztCommonInfo: new ZtCommonInfo({
+                kpn: "ACFUN_APP",
+                kpf: "PC_WEB",
+                uid: userId,
+            }),
+        })
+        var buffer = Register.encode(register).finish()
         console.log(buffer)
-        var decode = appInfo.decode(buffer)
-        console.log("decode+"+decode)
+        console.log(Register.decode(buffer))
 
-    },
-
+    }
 }
-
 
 
 module.exports = protobuf;
