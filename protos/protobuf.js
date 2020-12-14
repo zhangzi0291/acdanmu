@@ -24,9 +24,7 @@ const protobuf = {
             }),
         })
         var buffer = Register.encode(register).finish()
-        console.log(buffer)
-        console.log(Register.decode(buffer))
-
+        return buffer
     }
 }
 

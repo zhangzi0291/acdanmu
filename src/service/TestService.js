@@ -9,16 +9,17 @@ const service = {
     },
     protobuf(){
 
-        protobuf.Register(123213)
+        
     },
-    async ws(){
+    async ws(uid){
         let token;
         await this.getACToken().then((data)=>token = data)
         let suffix = "?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId="+token.userId+"&did="+token._did+"&acfun.api.visitor_st="+token.visitor_st
         console.log(token)
         
         let liveInfo;
-        await this.getLiveInfo(suffix,token._did,"386001").then((data)=>liveInfo = data)
+        console.log(uid )
+        await this.getLiveInfo(suffix,token._did,uid).then((data)=>liveInfo = data)
         console.log(liveInfo)
 
         let userId = token.userId
@@ -32,7 +33,7 @@ const service = {
         await this.getWatchingList(suffix,liveId,userId).then((data)=>watchingList = data)
         console.log(watchingList.length)
 
-        this.wsCreate()
+        this.wsCreate(userId)
 
     },
     async getACToken(){
@@ -80,6 +81,11 @@ const service = {
             }
         }).then(res => {
             var data = res.data.data;
+            if(!!res.data.error_msg){
+                throw new Error(res.data.error_msg)
+            }
+            console.log(res.data)
+            console.log(data)
             liveId = data.liveId
             title = data.caption
             availableTickets = data.availableTickets
@@ -112,21 +118,34 @@ const service = {
             'liveId': liveId,
             'visitorId': userId,
         })).then(res => {
-            console.log(res.data)
             watchingList = res.data.data.list;
         })
         return watchingList;
     },
-    wsCreate(){
-        io
+    wsCreate(userId){
+        const socket = io('wss://link.xiatou.com/')
+        socket.open()
+
+        var buffer = protobuf.Register(userId)
+        console.log(socket.connected)
+        
+        socket.on("connect",(data)=>{
+            console.log(data)
+        })
+        socket.on("receive",(data)=>{
+            console.log(data)
+        })
+        socket.send(buffer);
+
         return ""
     },
     getCookie(cookie,name){
         var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
-        if(arr=cookie.match(reg))
-        return unescape(arr[2]);
-        else
-        return null;
+        if(arr=cookie.match(reg)){
+            return unescape(arr[2]);
+        } else {
+            return null;
+        }
     }
 }
 

@@ -10,8 +10,9 @@ const controller = {
         return test
     },
     wstest(ctx){
-        testService.protobuf()
-        return "wstest"
+        var uid = ctx.query.uid
+        testService.ws(uid)
+        return uid
     }
 
 }
